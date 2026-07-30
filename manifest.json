@@ -1,0 +1,33 @@
+{
+  "cloud_writes": false,
+  "description": "Cluster a pile of logs into distinct root causes, each with a representative sample.",
+  "distribution": "standalone",
+  "engine": "scripts/error_triage.py",
+  "entrypoint": "SKILL.md",
+  "exit_codes": {
+    "0": "pass",
+    "1": "review",
+    "2": "block",
+    "3": "evidence error"
+  },
+  "input": "A log file or a directory of logs containing errors and stack traces.",
+  "name": "error-triage",
+  "network_required": false,
+  "outputs": [
+    "error-triage.json",
+    "error-triage.md",
+    "error-triage.html"
+  ],
+  "runtime": {
+    "python": ">=3.10",
+    "third_party_packages": []
+  },
+  "schemas": {
+    "output": "references/report-schema.json"
+  },
+  "sends_messages": false,
+  "source_pack": "scout-codeops-kit",
+  "template": "templates/service.example.log",
+  "tests": "tests/test_error_triage.py",
+  "version": "1.0.0"
+}

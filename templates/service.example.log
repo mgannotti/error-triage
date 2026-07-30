@@ -1,0 +1,86 @@
+2026-03-04T09:00:01Z INFO  api-gateway starting, build 4.2.0
+2026-03-04T09:00:02Z INFO  connected to cache cluster (3 nodes)
+2026-03-04T09:02:11Z ERROR could not acquire connection from pool after 5012ms
+Traceback (most recent call last):
+  File "app/http/handlers.py", line 61, in get_orders
+  File "app/db/pool.py", line 88, in acquire
+  File "app/db/pool.py", line 140, in _wait_for_free
+TimeoutError: pool exhausted (size=10, waiters=37)
+2026-03-04T09:02:14Z ERROR could not acquire connection from pool after 5003ms
+Traceback (most recent call last):
+  File "app/http/handlers.py", line 61, in get_orders
+  File "app/db/pool.py", line 88, in acquire
+  File "app/db/pool.py", line 140, in _wait_for_free
+TimeoutError: pool exhausted (size=10, waiters=41)
+2026-03-04T09:02:18Z ERROR could not acquire connection from pool after 5000ms
+Traceback (most recent call last):
+  File "app/http/handlers.py", line 61, in get_orders
+  File "app/db/pool.py", line 88, in acquire
+  File "app/db/pool.py", line 140, in _wait_for_free
+TimeoutError: pool exhausted (size=10, waiters=44)
+2026-03-04T09:02:23Z ERROR could not acquire connection from pool after 5021ms
+Traceback (most recent call last):
+  File "app/http/handlers.py", line 61, in get_orders
+  File "app/db/pool.py", line 88, in acquire
+  File "app/db/pool.py", line 140, in _wait_for_free
+TimeoutError: pool exhausted (size=10, waiters=52)
+2026-03-04T09:02:29Z ERROR could not acquire connection from pool after 5008ms
+Traceback (most recent call last):
+  File "app/http/handlers.py", line 61, in get_orders
+  File "app/db/pool.py", line 88, in acquire
+  File "app/db/pool.py", line 140, in _wait_for_free
+TimeoutError: pool exhausted (size=10, waiters=58)
+2026-03-04T09:02:35Z ERROR could not acquire connection from pool after 5017ms
+Traceback (most recent call last):
+  File "app/http/handlers.py", line 61, in get_orders
+  File "app/db/pool.py", line 88, in acquire
+  File "app/db/pool.py", line 140, in _wait_for_free
+TimeoutError: pool exhausted (size=10, waiters=63)
+2026-03-04T09:02:41Z ERROR could not acquire connection from pool after 5004ms
+Traceback (most recent call last):
+  File "app/http/handlers.py", line 61, in get_orders
+  File "app/db/pool.py", line 88, in acquire
+  File "app/db/pool.py", line 140, in _wait_for_free
+TimeoutError: pool exhausted (size=10, waiters=70)
+2026-03-04T09:02:47Z ERROR could not acquire connection from pool after 5009ms
+Traceback (most recent call last):
+  File "app/http/handlers.py", line 61, in get_orders
+  File "app/db/pool.py", line 88, in acquire
+  File "app/db/pool.py", line 140, in _wait_for_free
+TimeoutError: pool exhausted (size=10, waiters=74)
+2026-03-04T09:04:02Z ERROR order lookup failed for request 8f2c1a90-1111-2222-3333-444455556666
+Traceback (most recent call last):
+  File "app/http/handlers.py", line 61, in get_orders
+  File "app/db/pool.py", line 88, in acquire
+OperationalError: server closed the connection unexpectedly
+2026-03-04T09:04:38Z ERROR order lookup failed for request 0a0a0a0a-9999-8888-7777-666655554444
+Traceback (most recent call last):
+  File "app/http/handlers.py", line 61, in get_orders
+  File "app/db/pool.py", line 88, in acquire
+OperationalError: server closed the connection unexpectedly
+2026-03-04T09:06:10Z ERROR order lookup failed for request 3c3c3c3c-5555-4444-3333-222211110000
+Traceback (most recent call last):
+  File "app/http/handlers.py", line 61, in get_orders
+  File "app/db/pool.py", line 88, in acquire
+OperationalError: server closed the connection unexpectedly
+2026-03-04T09:11:44Z WARN  cache node 2 slow to respond (812ms)
+2026-03-04T09:14:03Z ERROR failed to render invoice pdf for order 88213
+Traceback (most recent call last):
+  File "app/render/pdf.py", line 210, in build
+ValueError: unsupported glyph in font subset
+2026-03-04T09:20:00Z INFO  nightly export failed for batch 12, retrying tomorrow
+2026-03-04T09:21:07Z INFO  nightly export failed for batch 19, retrying tomorrow
+2026-03-04T09:25:31Z ERROR auth rejected upstream response token=abc123def456 user=svc-billing
+2026-03-04T09:31:19Z ERROR webhook delivery to partner endpoint returned 503 Service Unavailable
+2026-03-04T09:33:02Z ERROR webhook delivery to partner endpoint returned 503 Service Unavailable
+2026-03-04T09:38:55Z ERROR unhandled exception in background worker
+Traceback (most recent call last):
+  File "app/worker/loop.py", line 44, in tick
+KeyError: 'tenant_id'
+2026-03-04T09:41:12Z ERROR unhandled exception in background worker
+Traceback (most recent call last):
+  File "app/worker/loop.py", line 44, in tick
+KeyError: 'tenant_id'
+2026-03-04T09:47:20Z ERROR disk write refused on /var/spool/outbound
+2026-03-04T09:52:41Z ERROR search index update timed out after 30000ms
+2026-03-04T09:58:03Z INFO  request completed in 41ms
