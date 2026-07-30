@@ -77,6 +77,13 @@ Representative samples are meant to be pasted into a ticket, so anything
 credential-shaped is replaced with a mask — `pre…len=42 fp=ab12cd34ef56` — before
 it reaches any artifact. A secret found in a log is reported, never reproduced.
 
+Detection is the shared set in `scoutkit.redaction`, the same one `secret-sweeper`
+uses. It used to be a second, smaller copy that lived here, and the copy fell
+behind: it missed Google keys, Azure shared keys, URL passwords, and every
+environment-variable shape from `DB_PASSWORD=` to `AWS_SECRET_ACCESS_KEY=`.
+Those values were reported as no finding at all *and* copied verbatim into the
+JSON. One definition, shared, is the fix.
+
 ## Limits — state these when you report
 
 - **Clustering is textual.** Two occurrences of one bug that produce genuinely
@@ -92,6 +99,13 @@ it reaches any artifact. A secret found in a log is reported, never reproduced.
   incident signal at all — and the report says so rather than staying quiet.
 - `ET008` deliberately ignores records with *no* stack trace. A plain error line
   is normal; a truncated trace is a swallowed cause.
+- **A masked credential is not anonymous if the secret is weak.** `fp=` is
+  derived with PBKDF2 and a fixed salt — expensive to search, not impossible. A
+  short password or a dictionary word is still recoverable offline by someone
+  holding the report. Exact lengths are withheld below 20 characters.
+- **Redaction is shape-based.** A credential with no recognizable shape — a bare
+  high-entropy string with no assignment around it — is not detected here and
+  will appear in a sample. Run `secret-sweeper` over the source if that matters.
 - Share and ranking below about twenty records are arithmetic, not evidence.
   `ET009` fires rather than letting you read significance into three data points.
 - This reads what the log says. A failure that was never logged is invisible

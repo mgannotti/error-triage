@@ -29,6 +29,7 @@ from scoutkit import (  # noqa: E402
     Finding,
     Report,
     Severity,
+    credential_spans,
     deepest_application_frame,
     iter_text_files,
     level_of,
@@ -36,7 +37,7 @@ from scoutkit import (  # noqa: E402
     mask,
     normalize_line,
     read_text,
-    shannon_entropy,
+    redact_text,
     split_records,
     stack_frames,
     truncate,
@@ -72,19 +73,23 @@ _FAILURE_TEXT = re.compile(
 # Credential shapes worth catching *in the log itself*. A log that records a
 # token has copied a secret into a system with different retention and different
 # access control than the one that issued it.
-_CREDENTIAL = re.compile(
-    r"\b(?:AKIA[0-9A-Z]{8,}"
-    r"|gh[pousr]_[A-Za-z0-9]{16,}"
-    r"|xox[baprs]-[A-Za-z0-9-]{10,}"
-    r"|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}"
-    r"|-----BEGIN [A-Z ]*PRIVATE KEY-----)",
-)
-_ASSIGNED_SECRET = re.compile(
-    r"(?P<key>\b(?:password|passwd|pwd|secret|token|api[_-]?key|access[_-]?key|"
-    r"authorization|auth[_-]?token|client[_-]?secret)\b)"
-    r"\s*[=:]\s*[\"']?(?P<value>[^\s\"',;&]{8,})",
-    re.IGNORECASE,
-)
+#
+# Detection lives in scoutkit.redaction, shared with secret-sweeper. It used to
+# live here as a second, smaller copy, and the copy fell behind: it missed
+# Google keys, Azure shared keys, URL passwords, and — because it anchored the
+# keyword with `\b`, which cannot match after an underscore — every environment
+# variable shape from `DB_PASSWORD=` to `AWS_SECRET_ACCESS_KEY=`. Those values
+# were reported as no finding at all *and* reproduced verbatim in the sample.
+
+
+def redact(text: str) -> str:
+    """Replace anything credential-shaped with its mask, in place.
+
+    A representative sample is only useful if it can be pasted into a ticket.
+    Reproducing a token in the artifact would move the secret rather than
+    report it.
+    """
+    return redact_text(text or "")
 
 _TIMESTAMP = re.compile(
     r"(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:[.,]\d+)?(?:Z|[+-]\d{2}:?\d{2})?)"
@@ -110,13 +115,7 @@ def redact(text: str) -> str:
     Reproducing a token in the artifact would move the secret rather than
     report it.
     """
-    result = _CREDENTIAL.sub(lambda m: f"<redacted {mask(m.group(0))}>", text or "")
-    result = _ASSIGNED_SECRET.sub(
-        lambda m: (m.group("key") + "=" + m.group("value")) if looks_like_placeholder(m.group("value"))
-        else f"{m.group('key')}=<redacted {mask(m.group('value'))}>",
-        result,
-    )
-    return result
+    return redact_text(text or "")
 
 
 def _is_failure(record: list[str]) -> bool:
@@ -178,15 +177,18 @@ def cluster_key(record: dict[str, Any]) -> str:
 
 
 def _find_credentials(records: list[dict[str, Any]]) -> list[tuple[str, str]]:
-    """(source, masked) for every credential-shaped value present in the logs."""
+    """(source, masked) for every credential-shaped value present in the logs.
+
+    Uses the same detection set as the redaction that protects the samples, so
+    a value can never be reproduced in a sample while going unreported here —
+    which is exactly what happened while this engine carried its own patterns.
+    """
     seen: dict[str, str] = {}
     for record in records:
         body = "\n".join(record["lines"])
-        for match in _CREDENTIAL.finditer(body):
-            seen.setdefault(mask(match.group(0)), record["source"])
-        for match in _ASSIGNED_SECRET.finditer(body):
-            value = match.group("value")
-            if looks_like_placeholder(value) or shannon_entropy(value) < 2.5:
+        for start, end in credential_spans(body):
+            value = body[start:end]
+            if looks_like_placeholder(value):
                 continue
             seen.setdefault(mask(value), record["source"])
     return sorted((source, masked) for masked, source in seen.items())

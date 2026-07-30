@@ -29,5 +29,5 @@
   "source_pack": "scout-codeops-kit",
   "template": "templates/service.example.log",
   "tests": "tests/test_error_triage.py",
-  "version": "1.0.0"
+  "version": "1.1.0"
 }
